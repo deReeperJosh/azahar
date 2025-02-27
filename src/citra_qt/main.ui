@@ -235,6 +235,7 @@
     <addaction name="separator"/>
     <addaction name="action_Create_ROM_Bundle"/>
     <addaction name="action_Extract_ROM_Bundle"/>
+    <addaction name="action_Manage_Skylanders"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -543,6 +544,11 @@
   <action name="action_Extract_ROM_Bundle">
    <property name="text">
     <string>Extract ROM Bundle...</string>
+   </property>
+  </action>
+  <action name="action_Manage_Skylanders">
+   <property name="text">
+    <string>Manage Skylanders</string>
    </property>
   </action>
   <action name="action_View_Lobby">
