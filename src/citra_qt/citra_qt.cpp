@@ -1,4 +1,4 @@
-// Copyright Citra Emulator Project / Lime3DS Emulator Project
+// Copyright Citra Emulator Project / Azahar Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
@@ -62,6 +62,7 @@
 #include "citra_qt/dumping/dumping_dialog.h"
 #include "citra_qt/game_list.h"
 #include "citra_qt/hotkeys.h"
+#include "citra_qt/infrared/skylanderportal/skylander_dialog.h"
 #include "citra_qt/loading_screen.h"
 #include "citra_qt/movie/movie_play_dialog.h"
 #include "citra_qt/movie/movie_record_dialog.h"
@@ -1061,6 +1062,7 @@ void GMainWindow::ConnectMenuEvents() {
     });
     connect_menu(ui->action_Capture_Screenshot, &GMainWindow::OnCaptureScreenshot);
     connect_menu(ui->action_Dump_Video, &GMainWindow::OnDumpVideo);
+    connect_menu(ui->action_Manage_Skylanders, &GMainWindow::ShowSkylanderPortal);
 
     // Help
     connect_menu(ui->action_Open_Citra_Folder, &GMainWindow::OnOpenCitraFolder);
@@ -3045,6 +3047,16 @@ void GMainWindow::OnStopVideoDumping() {
         });
         future_watcher->setFuture(future);
     }
+}
+
+void GMainWindow::ShowSkylanderPortal() {
+    if (!m_skylander_window) {
+        m_skylander_window = SkylanderPortalWindow::get_dlg(this);
+    }
+
+    m_skylander_window->show();
+    m_skylander_window->raise();
+    m_skylander_window->activateWindow();
 }
 
 void GMainWindow::UpdateStatusBar() {
