@@ -61,6 +61,7 @@ class QProgressBar;
 class QPushButton;
 class QSlider;
 class RegistersWidget;
+class SkylanderPortalWindow;
 class WaitTreeWidget;
 
 namespace Camera {
@@ -296,6 +297,7 @@ private slots:
     void OnDumpVideo();
     void OnCompressFile();
     void OnDecompressFile();
+    void ShowSkylanderPortal();
 #ifdef _WIN32
     void OnOpenFFmpeg();
 #endif
@@ -411,6 +413,8 @@ private:
     bool game_paused_for_dumping = false;
 
     int gdbport_from_arg = -1;
+
+    SkylanderPortalWindow* m_skylander_window = nullptr;
 
     QString gl_renderer;
     std::vector<QString> physical_devices;

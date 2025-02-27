@@ -69,6 +69,7 @@
 #include "citra_qt/dumping/dumping_dialog.h"
 #include "citra_qt/game_list.h"
 #include "citra_qt/hotkeys.h"
+#include "citra_qt/infrared/skylanderportal/skylander_dialog.h"
 #include "citra_qt/loading_screen.h"
 #include "citra_qt/movie/movie_play_dialog.h"
 #include "citra_qt/movie/movie_record_dialog.h"
@@ -1198,6 +1199,7 @@ void GMainWindow::ConnectMenuEvents() {
     });
     connect_menu(ui->action_Capture_Screenshot, &GMainWindow::OnCaptureScreenshot);
     connect_menu(ui->action_Dump_Video, &GMainWindow::OnDumpVideo);
+    connect_menu(ui->action_Manage_Skylanders, &GMainWindow::ShowSkylanderPortal);
 
     // Tools debug
     connect_menu(ui->action_Debug_Pause, [this] {
@@ -3591,6 +3593,16 @@ void GMainWindow::OnStopVideoDumping() {
         });
         future_watcher->setFuture(future);
     }
+}
+
+void GMainWindow::ShowSkylanderPortal() {
+    if (!m_skylander_window) {
+        m_skylander_window = SkylanderPortalWindow::get_dlg(this);
+    }
+
+    m_skylander_window->show();
+    m_skylander_window->raise();
+    m_skylander_window->activateWindow();
 }
 
 void GMainWindow::UpdateStatusBar() {

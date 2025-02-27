@@ -145,6 +145,8 @@ add_library(citra_qt STATIC EXCLUDE_FROM_ALL
     hotkeys.h
     hotkey_monitor.cpp
     hotkey_monitor.h
+    infrared/skylanderportal/skylander_dialog.cpp
+    infrared/skylanderportal/skylander_dialog.h
     loading_screen.cpp
     loading_screen.h
     loading_screen.ui
