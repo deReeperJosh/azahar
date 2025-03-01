@@ -164,7 +164,7 @@ public:
         PacketInfo packet = GetPacketInfo(info.begin_index);
 
         u8* buf = GetDataBufferPointer(packet.offset);
-        for (int i = 0; i < packet.size; i++) {
+        for (u8 i = 0; i < packet.size; i++) {
             buffer.push_back(buf[i]);
         }
         return true;
