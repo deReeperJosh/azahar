@@ -84,6 +84,8 @@ private:
      */
     void InitializeIrNopShared(Kernel::HLERequestContext& ctx);
 
+    void InitializeIrNop(Kernel::HLERequestContext& ctx);
+
     /**
      * RequireConnection service function
      * Searches for an IR device and connects to it. After connecting to the device, applications
@@ -159,6 +161,8 @@ private:
      *      1 : Result of function, 0 on success, otherwise error code
      */
     void SendIrNop(Kernel::HLERequestContext& ctx);
+
+    void ReceiveIrnopLarge(Kernel::HLERequestContext& ctx);
 
     /**
      * ReleaseReceivedData function

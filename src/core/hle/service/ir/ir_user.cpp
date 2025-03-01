@@ -157,6 +157,19 @@ public:
         return true;
     }
 
+    bool Get(u32 size, std::vector<u8>& buffer) {
+        if (info.packet_count == 0)
+            return false;
+
+        PacketInfo packet = GetPacketInfo(info.begin_index);
+
+        u8* buf = GetDataBufferPointer(packet.offset);
+        for (int i = 0; i < packet.size; i++) {
+            buffer.push_back(buf[i]);
+        }
+        return true;
+    }
+
 private:
     struct BufferInfo {
         u32_le begin_index;
@@ -231,7 +244,7 @@ private:
 
 /// Wraps the payload into packet and puts it to the receive buffer
 void IR_USER::PutToReceive(std::span<const u8> payload) {
-    LOG_TRACE(Service_IR, "called, data={}", fmt::format("{:02x}", fmt::join(payload, " ")));
+    LOG_INFO(Service_IR, "called, data={}", fmt::format("{:02x}", fmt::join(payload, " ")));
     std::size_t size = payload.size();
 
     std::vector<u8> packet;
@@ -295,6 +308,33 @@ void IR_USER::InitializeIrNopShared(Kernel::HLERequestContext& ctx) {
     SharedMemoryHeader shared_memory_init{};
     shared_memory_init.initialized = 1;
     std::memcpy(shared_memory->GetPointer(), &shared_memory_init, sizeof(SharedMemoryHeader));
+
+    rb.Push(ResultSuccess);
+
+    LOG_INFO(Service_IR,
+             "called, shared_buff_size={}, recv_buff_size={}, "
+             "recv_buff_packet_count={}, send_buff_size={}, "
+             "send_buff_packet_count={}, baud_rate={}",
+             shared_buff_size, recv_buff_size, recv_buff_packet_count, send_buff_size,
+             send_buff_packet_count, baud_rate);
+}
+
+void IR_USER::InitializeIrNop(Kernel::HLERequestContext& ctx) {
+    IPC::RequestParser rp(ctx);
+    const u32 shared_buff_size = rp.Pop<u32>();
+    const u32 recv_buff_size = rp.Pop<u32>();
+    const u32 recv_buff_packet_count = rp.Pop<u32>();
+    const u32 send_buff_size = rp.Pop<u32>();
+    const u32 send_buff_packet_count = rp.Pop<u32>();
+    const u8 baud_rate = rp.Pop<u8>();
+    shared_memory = rp.PopObject<Kernel::SharedMemory>();
+
+    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+
+    shared_memory->SetName("IR_USER: shared memory");
+
+    receive_buffer = std::make_unique<BufferManager>(shared_memory, 0x10, 0x20,
+                                                     recv_buff_packet_count, recv_buff_size);
 
     rb.Push(ResultSuccess);
 
@@ -419,11 +459,12 @@ void IR_USER::GetConnectionStatusEvent(Kernel::HLERequestContext& ctx) {
 }
 
 void IR_USER::GetConnectionStatus(Kernel::HLERequestContext& ctx) {
-    IPC::RequestBuilder rb(ctx, 0x13, 1, 0);
+    IPC::RequestBuilder rb(ctx, 0x13, 1, 2);
 
     if (connected_portal) {
         conn_status_event->Signal();
         rb.Push(ResultSuccess);
+        rb.Push(2);
     } else {
         LOG_ERROR(Service_IR, "not connected");
         rb.Push(Result(static_cast<ErrorDescription>(0x13), ErrorModule::IR,
@@ -474,7 +515,25 @@ void IR_USER::SendIrNop(Kernel::HLERequestContext& ctx) {
                        ErrorSummary::InvalidState, ErrorLevel::Status));
     }
 
-    LOG_TRACE(Service_IR, "called, data={}", fmt::format("{:02x}", fmt::join(buffer, " ")));
+    LOG_INFO(Service_IR, "called, data={}", fmt::format("{:02x}", fmt::join(buffer, " ")));
+}
+
+void IR_USER::ReceiveIrnopLarge(Kernel::HLERequestContext& ctx) {
+    IPC::RequestParser rp(ctx);
+    const u32 size = rp.Pop<u32>();
+    std::vector<u8> buffer = rp.PopStaticBuffer();
+
+    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+
+    if (receive_buffer && receive_buffer->Get(size, buffer)) {
+        receive_event->Signal();
+        rb.Push(ResultSuccess);
+    } else {
+        rb.Push(Result(static_cast<ErrorDescription>(13), ErrorModule::IR,
+                       ErrorSummary::InvalidState, ErrorLevel::Status));
+    }
+
+    LOG_INFO(Service_IR, "called, data={}", fmt::format("{:02x}", fmt::join(buffer, " ")));
 }
 
 void IR_USER::ReleaseReceivedData(Kernel::HLERequestContext& ctx) {
@@ -491,13 +550,13 @@ void IR_USER::ReleaseReceivedData(Kernel::HLERequestContext& ctx) {
                        ErrorLevel::Status));
     }
 
-    LOG_TRACE(Service_IR, "called, count={}", count);
+    LOG_INFO(Service_IR, "called, count={}", count);
 }
 
 IR_USER::IR_USER(Core::System& system) : ServiceFramework("ir:USER", 1) {
     const FunctionInfo functions[] = {
         // clang-format off
-        {0x0001, nullptr, "InitializeIrNop"},
+        {0x0001, &IR_USER::InitializeIrNop, "InitializeIrNop"},
         {0x0002, &IR_USER::FinalizeIrNop, "FinalizeIrNop"},
         {0x0003, nullptr, "ClearReceiveBuffer"},
         {0x0004, nullptr, "ClearSendBuffer"},
