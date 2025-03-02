@@ -523,10 +523,10 @@ void IR_USER::ReceiveIrnopLarge(Kernel::HLERequestContext& ctx) {
     const u32 size = rp.Pop<u32>();
     std::vector<u8> buffer = rp.PopStaticBuffer();
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
 
     if (receive_buffer && receive_buffer->Get(size, buffer)) {
-        receive_event->Signal();
+        receive_buffer->Release(1);
         rb.Push(ResultSuccess);
     } else {
         rb.Push(Result(static_cast<ErrorDescription>(13), ErrorModule::IR,
@@ -571,7 +571,7 @@ IR_USER::IR_USER(Core::System& system) : ServiceFramework("ir:USER", 1) {
         {0x000D, &IR_USER::SendIrNop, "SendIrNop"},
         {0x000E, nullptr, "SendIrNopLarge"},
         {0x000F, nullptr, "ReceiveIrnop"},
-        {0x0010, nullptr, "ReceiveIrnopLarge"},
+        {0x0010, &IR_USER::ReceiveIrnopLarge, "ReceiveIrnopLarge"},
         {0x0011, nullptr, "GetLatestReceiveErrorResult"},
         {0x0012, nullptr, "GetLatestSendErrorResult"},
         {0x0013, &IR_USER::GetConnectionStatus, "GetConnectionStatus"},
