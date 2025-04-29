@@ -534,7 +534,8 @@ void IR_USER::ReceiveIrnopLarge(Kernel::HLERequestContext& ctx) {
                        ErrorSummary::InvalidState, ErrorLevel::Status));
     }
 
-    LOG_INFO(Service_IR, "called, size={}, data={}", size, fmt::format("{:02x}", fmt::join(buffer, " ")));
+    LOG_INFO(Service_IR, "called, size={}, data={}", size,
+             fmt::format("{:02x}", fmt::join(buffer, " ")));
 }
 
 void IR_USER::ReleaseReceivedData(Kernel::HLERequestContext& ctx) {
