@@ -8,6 +8,7 @@
 
 #include <QDialog>
 #include <QLineEdit>
+#include "core/hle/service/ir/ir_portal.h"
 
 constexpr auto UI_SKY_NUM = 8;
 
