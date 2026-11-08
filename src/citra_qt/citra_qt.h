@@ -323,13 +323,9 @@ private slots:
     void OnDecompressFile();
     void OnCreateBundle();
     void OnExtractBundle();
+    void ShowSkylanderPortal();
 #ifdef ENABLE_FFMPEG
     void OnDumpVideo();
-#endif
-    void ShowSkylanderPortal();
-#ifdef _WIN32
-    void OnOpenFFmpeg();
-#endif
     void OnStartVideoDumping();
     void StartVideoDumping(const QString& path);
     void OnStopVideoDumping();
